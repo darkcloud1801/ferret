@@ -1,59 +1,90 @@
 name: "cohen"
 fs:
+  url: "/usr/share/fscrawler/cohen"
+  follow_symlink: false
+  remove_deleted: true
+  continue_on_error: false
+
+  # scan every 5 minutes for changes in url defined above
+  update_rate: "5m"
+
+#  # optional: define includes and excludes, "~" files are excluded by default if not defined below
+#  includes:
+#  - "*.doc"
+#  - "*.xls"
+  excludes:
+  - "*.M4V"
+  - "*.MP3"
+  - "*.MP4"
+  - "*.WAV"
+  - "*.TTF"
+  - "*.EXE"
+  - "*.MSI"
+
+  # optional: do not send big files to TIKA
+#  ignore_above: "512mb"
+
+  # special handling of JSON files, should only be used if ALL files are JSON
+  json_support: false
+  add_as_inner_object: false
+
+  # special handling of XML files, should only be used if ALL files are XML
+  xml_support: false
+
+  # use MD5 from filename (instead of filename) if set to false
+  filename_as_id: true
+
+  # include size ot file in index
+  add_filesize: true
+
+  # inlcude user/group of file only if needed
+  attributes_support: false
+
+  # do you REALLY want to store every file as a copy in the index ? Then set this to true
+  store_source: false
+
+  # you may want to store (partial) content of the file (see indexed_chars)
+  index_content: true
+
+  # how much data from the content of the file should be indexed (and stored inside the index), set to 0 if you need checksum, but no content at all to be indexed
+  #indexed_chars: "0"
   indexed_chars: 100%
+
+  # usually file metadata will be stored in separate fields, if you want to keep the original set, set this to true
+  raw_metadata: false
+
+  # optional: add checksum meta (requires index_content to be set to true)
+  checksum: "MD5"
+
+  # recommmended, but will create another index
+  index_folders: true
+
   lang_detect: true
-  continue_on_error: true
+
   ocr:
-    language: "eng"
+    language: "eng"  # Specify the language for Tesseract OCR
+    path: "/usr/bin/tesseract"  # Path to the Tesseract executable
+    pdf_strategy: "ocr_and_text"  # Strategy for PDFs (ocr_only, no_ocr, or ocr_and_text)
+    output_type: "txt"  # Output type for OCR content (txt, hocr, alto)
+
+
     enabled: true
-    pdf_strategy: "ocr_and_text"
+    ignore_robots_txt: true
+    pdftotext_options: ""
+    rotate_angle: 0
+    ignore_errors: true
+    language_overrides:
+    rotate_pages: true
+    rotate_pages_threshold: 10
+
 elasticsearch:
+  index: "cohen"
   nodes:
-    - url: "http://elasticsearch:9200"
+    - url: "https://es01:9200"
+#  pipeline: "content_preprocessor"
   username: "elastic"
-  password: "changeme"
+  password: "admin1234!"
   ssl_verification: false
+
 rest :
   url: "http://fscrawler:8080"
-#elasticsearch:
-#  index: "cohen"
-#  index_folder: "cohen"
-#rest :
-#  url: "http://fscrawler:8080"
-#fs:
-#  url: "/usr/share/fscrawler/data"
-#  update_rate: "15m"
-#  excludes:
-#    - "*/~*"
-#    - "*.tmp"
-#    - "*.temp"
-#  json_support: false
-#  filename_as_id: true
-#  add_filesize: true
-#  remove_deleted: true
-#  store_source: false
-#  index_content: true
-#  attributes_support: false
-#  raw_metadata: false
-#  indexed_chars: -1
-#  indexed_chars_field: "indexing"
-#  ocr:
-#    language: "eng"
-#    enabled: true
-#    pdf_strategy: "ocr_and_text"
-#    ignore_robots_txt: true
-#    pdftotext_options: ""
-#    rotate_angle: 0
-#    ignore_errors: false
-#    output_type: "txt"
-#    language_overrides:
-#    rotate_pages: false
-#    rotate_pages_threshold: 10
-#  follow_symlinks: false
-#  add_as_inner_object: false
-#  indexed_chars_fieldname: "indexing"
-#  attributes: []
-#  xml_support: false
-#  index_folders: true
-#  lang_detect: false
-#  continue_on_error: false

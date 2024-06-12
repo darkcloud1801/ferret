@@ -1,0 +1,11 @@
+{
+  "description": "File Preprocessor",
+  "version": 1,
+  "processors": [
+    {
+      "trim": {
+        "field": "content"
+      }
+    }
+  ]
+}

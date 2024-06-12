@@ -25,6 +25,10 @@ services:
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - esdata01:/usr/share/elasticsearch/data
+      - ./docker/elasticsearch/pipelines/preprocessor.json:/usr/share/elasticsearch/config/pipelines/preprocessor.json
+      - ./docker/elasticsearch/create_pipeline.sh:/usr/share/elasticsearch/config/create_pipeline.sh
+    env_file:
+      - .env
     ports:
       - ${ES_PORT}:9200
     environment:
@@ -61,6 +65,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    entrypoint: ["/bin/bash", "-c", "/usr/local/bin/docker-entrypoint.sh && /usr/share/elasticsearch/config/create_pipeline.sh"]
 
 #  es02:
 #    depends_on:
@@ -170,26 +175,28 @@ services:
       timeout: 10s
       retries: 120
 
-#  fscrawler:
-#    depends_on:
-#      elasticsearch:
-#        condition: service_healthy
-#    image: dadoonet/fscrawler:2.10-SNAPSHOT
-#    container_name: fscrawler
-#    restart: always
-#    volumes:
-#      - ./data:/tmp/es:ro
-#      #      - ./documents/client2:/usr/share/fscrawler/client2
-#      - ./config:/root/.fscrawler
-#      - ./logs:/usr/share/fscrawler/logs
-#    environment:
-#      - "FSCRAWLER_INDEX=cohen"
-#      - "FSCRAWLER_URL=https://elasticsearch:9200"
-#      - "FSCRAWLER_DEBUG=true"
-#    ports:
-#      - "8080:8080"
-#    command: fscrawler cohen --restart --rest
-#
+  fscrawler:
+    build:
+      context: .
+      dockerfile: docker/fscrawler/Dockerfile
+    depends_on:
+      es01:
+        condition: service_healthy
+    container_name: fscrawler
+    restart: always
+    volumes:
+      - ./documents/cohen:/usr/share/fscrawler/cohen
+      - ./config:/root/.fscrawler
+      - ./logs:/usr/share/fscrawler/logs
+      - ./external:/usr/share/fscrawler/external
+    environment:
+      - FSCRAWLER_INDEX=cohen
+      - FSCRAWLER_URL=https://es01:9200
+      - FSCRAWLER_DEBUG=true
+    ports:
+      - "8080:8080"
+    command: fscrawler cohen --restart --rest
+
 
 volumes:
   certs:
