@@ -79,12 +79,16 @@ fs:
 
 elasticsearch:
   index: "cohen"
+  type: "_doc"
   nodes:
     - url: "https://es01:9200"
-#  pipeline: "content_preprocessor"
+  pipeline: "content_preprocessor"
   username: "elastic"
   password: "admin1234!"
   ssl_verification: false
+  analysis:
+    analyzer:
+      path: "/usr/local/bin/config/cohen/mappings/mapping.json"
 
 rest :
   url: "http://fscrawler:8080"
