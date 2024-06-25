@@ -12,10 +12,10 @@ services:
     command: ["/bin/bash", "/usr/share/elasticsearch/scripts/setup.sh"]
 
     healthcheck:
-      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
-      interval: 1s
+      test: ["CMD-SHELL", "test -f /usr/local/bin/setup_done || exit 1"]
+      interval: 10s
       timeout: 5s
-      retries: 120
+      retries: 3
 
   es01:
     depends_on:
@@ -65,20 +65,21 @@ services:
       retries: 120
 
   pipeline-loader:
-    image: alpine
-    volumes:
-      - ./docker/elasticsearch/cohen:/usr/local/bin/config/cohen
-    entrypoint: ["/bin/sh", "/usr/local/bin/config/cohen/initialize_index.sh"]
-    env_file:
-      - .env
     depends_on:
       es01:
         condition: service_healthy
+    image: alpine
+    volumes:
+      - ./docker/elasticsearch/cohen:/usr/local/bin/config/elasticsearch
+      - ./docker/fscrawler/config:/usr/local/bin/config/fscrawler
+    entrypoint: ["/bin/sh", "/usr/local/bin/config/elasticsearch/initialize_index.sh"]
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD-SHELL", "test -f /usr/local/bin/init_pipeline_done || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
 
 #  es02:
 #    depends_on:
@@ -189,28 +190,30 @@ services:
       retries: 120
 
   fscrawler:
-    build:
-      context: .
-      dockerfile: docker/fscrawler/Dockerfile
     depends_on:
       pipeline-loader:
         condition: service_healthy
+      es01:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: docker/fscrawler/Dockerfile
     container_name: fscrawler
     restart: always
     volumes:
-      - ../cohen_documents/cohen:/usr/share/fscrawler/cohen
+      - ../cohen_documents/cohen/Individual:/usr/share/fscrawler/cohen/Individual
+      - ../cohen_documents/cohen/Natives:/usr/share/fscrawler/cohen/Natives
       - ./docker/fscrawler/config:/root/.fscrawler
       - ./docker/fscrawler/logs:/usr/share/fscrawler/logs
       - ./docker/fscrawler/external:/usr/share/fscrawler/external
       - ./docker/fscrawler/log4j2.properties:/usr/share/fscrawler/log4j2.properties:ro
     environment:
-      - FSCRAWLER_INDEX=cohen
-      - FSCRAWLER_URL=https://es01:9200
       - FSCRAWLER_DEBUG=true
       - FSCLOG=debug
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+    entrypoint: ["/bin/sh", "/root/.fscrawler/run_fscrawler.sh"]
     ports:
       - "8080:8080"
-    command: fscrawler cohen --restart --rest
 
 
 volumes:

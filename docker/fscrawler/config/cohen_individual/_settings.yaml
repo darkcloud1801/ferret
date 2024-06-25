@@ -1,6 +1,6 @@
-name: "cohen"
+name: "cohen_individual"
 fs:
-  url: "/usr/share/fscrawler/cohen"
+  url: "/usr/share/fscrawler/cohen/Individual"
   follow_symlink: false
   remove_deleted: true
   continue_on_error: false
@@ -78,7 +78,7 @@ fs:
     rotate_pages_threshold: 10
 
 elasticsearch:
-  index: "cohen"
+  index: "cohen_individual"
   type: "_doc"
   nodes:
     - url: "https://es01:9200"
