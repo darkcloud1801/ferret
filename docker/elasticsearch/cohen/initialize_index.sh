@@ -86,20 +86,6 @@ for config in /usr/local/bin/config/fscrawler/*; do
   fi
 done
 
-#echo "Creating Indexes..."
-#curl -s --cacert config/certs/ca/ca.crt -X PUT "https://es01:9200/cohen_individual" \
-#  -u fscrawler_user:${ELASTIC_PASSWORD} -k \
-#  -H 'Content-Type: application/json' \
-#  -d @/usr/local/bin/config/cohen/initialization/analyzers.json
-#echo "Cohen Individual Index Created."
-#curl -s --cacert config/certs/ca/ca.crt -X PUT "https://es01:9200/cohen_natives" \
-#  -u fscrawler_user:${ELASTIC_PASSWORD} -k \
-#  -H 'Content-Type: application/json' \
-#  -d @/usr/local/bin/config/cohen/initialization/analyzers.json
-#echo "Cohen Natives Index Created."
-
-
-# Make the curl request and capture the HTTP status code
 payload=$(curl -o /dev/null -s --cacert config/certs/ca/ca.crt -X GET "https://es01:9200/_ingest/pipeline/content_preprocessor" -u kibana_system:${KIBANA_PASSWORD} -k -w "%{http_code}\n")
 echo -e "The Payload"
 echo -e ${payload}

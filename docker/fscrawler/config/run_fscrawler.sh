@@ -8,6 +8,3 @@ for config in /root/.fscrawler/*; do
     fscrawler --config_dir /root/.fscrawler --loop 1 $(basename "$config") &
   fi
 done
-
-# Wait for all background processes to finish
-wait
