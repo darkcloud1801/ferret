@@ -159,4 +159,14 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-documents/cohen
+# FSCrawler Artifacts
+_status.json
+
+# Docker Artifacts
+docker/fscrawler/config/_default
+docker/fscrawler/logs
+docker/elasticsearch/data/certs/*
+docker/elasticsearch/data/es01/data/*
+docker/elasticsearch/data/es02/data/*
+docker/elasticsearch/data/es03/data/*
+

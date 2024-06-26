@@ -1,6 +1,7 @@
 name: "cohen_individual"
+
 fs:
-  url: "/usr/share/fscrawler/cohen/Individual"
+  url: "/usr/share/fscrawler/files/cohen/Individual"
   follow_symlink: false
   remove_deleted: true
   continue_on_error: false
@@ -92,3 +93,4 @@ elasticsearch:
 
 rest :
   url: "http://fscrawler:8080"
+

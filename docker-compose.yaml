@@ -4,7 +4,7 @@ services:
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
       - ./docker/setup/scripts/:/usr/share/elasticsearch/scripts
     user: "0"
     env_file:
@@ -23,8 +23,8 @@ services:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/certs:/usr/share/elasticsearch/config/certs
-      - ./data/elasticsearch/es01/data:/usr/share/elasticsearch/data
+      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/elasticsearch/data/es01/data:/usr/share/elasticsearch/data
     env_file:
       - .env
     ports:
@@ -169,7 +169,7 @@ services:
 #        condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/certs:/usr/share/kibana/config/certs
+      - ./docker/elasticsearch/data/certs:/usr/share/kibana/config/certs
       - kibanadata:/usr/share/kibana/data
     ports:
       - ${KIBANA_PORT}:5601
@@ -201,8 +201,7 @@ services:
     container_name: fscrawler
     restart: always
     volumes:
-      - ../cohen_documents/cohen/Individual:/usr/share/fscrawler/cohen/Individual
-      - ../cohen_documents/cohen/Natives:/usr/share/fscrawler/cohen/Natives
+      - ../expert_data_test:/usr/share/fscrawler/files
       - ./docker/fscrawler/config:/root/.fscrawler
       - ./docker/fscrawler/logs:/usr/share/fscrawler/logs
       - ./docker/fscrawler/external:/usr/share/fscrawler/external
