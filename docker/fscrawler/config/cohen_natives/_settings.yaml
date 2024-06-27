@@ -83,6 +83,8 @@ elasticsearch:
   type: "_doc"
   nodes:
     - url: "https://es01:9200"
+    - url: "https://es02:9200"
+    - url: "https://es03:9200"
   pipeline: "content_preprocessor"
   username: "elastic"
   password: "admin1234!"
