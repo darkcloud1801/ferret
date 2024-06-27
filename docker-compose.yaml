@@ -16,8 +16,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - es-net
 
   es01:
+    container_name: es01
     depends_on:
       setup:
         condition: service_healthy
@@ -28,16 +31,16 @@ services:
     env_file:
       - .env
     ports:
-      - ${ES_PORT}:9200
+      - 9200:9200
     environment:
       - node.name=es01
       - cluster.name=${CLUSTER_NAME}
-#      - cluster.initial_master_nodes=es01,es02,es03
-      - discovery.type=single-node
-#      - discovery.seed_hosts=es02,es03
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+#      - discovery.type=single-node
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=certs/es01/es01.key
@@ -63,10 +66,106 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    networks:
+      - es-net
+
+  es02:
+    container_name: es02
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/elasticsearch/data/es02/data:/usr/share/elasticsearch/data
+    env_file:
+      - .env
+    environment:
+      - node.name=es02
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/es02/es02.key
+      - xpack.security.http.ssl.certificate=certs/es02/es02.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.http.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/es02/es02.key
+      - xpack.security.transport.ssl.certificate=certs/es02/es02.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    networks:
+      - es-net
+
+  es03:
+    container_name: es03
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/elasticsearch/data/es03/data:/usr/share/elasticsearch/data
+    env_file:
+      - .env
+    environment:
+      - node.name=es03
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/es03/es03.key
+      - xpack.security.http.ssl.certificate=certs/es03/es03.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.http.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/es03/es03.key
+      - xpack.security.transport.ssl.certificate=certs/es03/es03.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    networks:
+      - es-net
 
   pipeline-loader:
     depends_on:
-      es01:
+      es03:
         condition: service_healthy
     image: alpine
     volumes:
@@ -80,93 +179,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-#  es02:
-#    depends_on:
-#      - es01
-#    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
-#    volumes:
-#      - ./certs:/usr/share/elasticsearch/config/certs
-#      - esdata02:/usr/share/elasticsearch/data
-#    environment:
-#      - node.name=es02
-#      - cluster.name=${CLUSTER_NAME}
-#      - cluster.initial_master_nodes=es01,es02,es03
-#      - discovery.seed_hosts=es01,es03
-#      - bootstrap.memory_lock=true
-#      - xpack.security.enabled=true
-#      - xpack.security.http.ssl.enabled=true
-#      - xpack.security.http.ssl.key=certs/es02/es02.key
-#      - xpack.security.http.ssl.certificate=certs/es02/es02.crt
-#      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
-#      - xpack.security.http.ssl.verification_mode=certificate
-#      - xpack.security.transport.ssl.enabled=true
-#      - xpack.security.transport.ssl.key=certs/es02/es02.key
-#      - xpack.security.transport.ssl.certificate=certs/es02/es02.crt
-#      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
-#      - xpack.security.transport.ssl.verification_mode=certificate
-#      - xpack.license.self_generated.type=${LICENSE}
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
-#    healthcheck:
-#      test:
-#        [
-#          "CMD-SHELL",
-#          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
-#        ]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 120
-#
-#  es03:
-#    depends_on:
-#      - es02
-#    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
-#    volumes:
-#      - ./certs:/usr/share/elasticsearch/config/certs
-#      - esdata03:/usr/share/elasticsearch/data
-#    environment:
-#      - node.name=es03
-#      - cluster.name=${CLUSTER_NAME}
-#      - cluster.initial_master_nodes=es01,es02,es03
-#      - discovery.seed_hosts=es01,es02
-#      - bootstrap.memory_lock=true
-#      - xpack.security.enabled=true
-#      - xpack.security.http.ssl.enabled=true
-#      - xpack.security.http.ssl.key=certs/es03/es03.key
-#      - xpack.security.http.ssl.certificate=certs/es03/es03.crt
-#      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
-#      - xpack.security.http.ssl.verification_mode=certificate
-#      - xpack.security.transport.ssl.enabled=true
-#      - xpack.security.transport.ssl.key=certs/es03/es03.key
-#      - xpack.security.transport.ssl.certificate=certs/es03/es03.crt
-#      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
-#      - xpack.security.transport.ssl.verification_mode=certificate
-#      - xpack.license.self_generated.type=${LICENSE}
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
-#    healthcheck:
-#      test:
-#        [
-#          "CMD-SHELL",
-#          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
-#        ]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 120
+    networks:
+      - es-net
 
   kibana:
     depends_on:
       es01:
         condition: service_healthy
-#      es02:
-#        condition: service_healthy
-#      es03:
-#        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     volumes:
       - ./docker/elasticsearch/data/certs:/usr/share/kibana/config/certs
@@ -188,12 +211,14 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    networks:
+      - es-net
 
   fscrawler:
     depends_on:
       pipeline-loader:
         condition: service_healthy
-      es01:
+      es03:
         condition: service_healthy
     build:
       context: .
@@ -202,6 +227,7 @@ services:
     restart: always
     volumes:
       - ../expert_data_test:/usr/share/fscrawler/files
+      - ./docker/elasticsearch/data/certs:/usr/share/fscrawler/certs
       - ./docker/fscrawler/config:/root/.fscrawler
       - ./docker/fscrawler/logs:/usr/share/fscrawler/logs
       - ./docker/fscrawler/external:/usr/share/fscrawler/external
@@ -209,20 +235,32 @@ services:
     environment:
       - FSCRAWLER_DEBUG=true
       - FSCLOG=debug
-      - JAVA_OPTS=-Xms512m -Xmx1024m
+
+#      - FRAMES_RELOAD=5
+##      - FRAMES_INDEX=fscrawler
+#      - FRAMES_INDEX_SETTINGS={\"number_of_shards\":1,\"number_of_replicas\":0}
+#      - FRAMES_ELASTICSEARCH_NODES=es01:9200,es02:9200,es03:9200
+#      - FRAMES_ELASTICSEARCH_USERNAME=kibana_system
+#      - FRAMES_ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+
     entrypoint: ["/bin/sh", "/root/.fscrawler/run_fscrawler.sh"]
     ports:
       - "8080:8080"
-
+    networks:
+      - es-net
 
 volumes:
-  certs:
-    driver: local
-  esdata01:
-    driver: local
-  esdata02:
-    driver: local
-  esdata03:
-    driver: local
+#  certs:
+#    driver: local
+#  esdata01:
+#    driver: local
+#  esdata02:
+#    driver: local
+#  esdata03:
+#    driver: local
   kibanadata:
     driver: local
+
+networks:
+  es-net:
+    driver: bridge
