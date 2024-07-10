@@ -15,4 +15,4 @@ for config in /root/.fscrawler/*; do
   fi
 done
 
-wait
+tail -f /dev/null

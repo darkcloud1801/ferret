@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -22,6 +21,7 @@ var/
 wheels/
 share/python-wheels/
 *.egg-info/
+.yarn/
 .installed.cfg
 *.egg
 MANIFEST
@@ -163,10 +163,14 @@ cython_debug/
 _status.json
 
 # Docker Artifacts
-docker/fscrawler/config/_default
-docker/fscrawler/logs
-docker/elasticsearch/data/certs/*
-docker/elasticsearch/data/es01/data/*
-docker/elasticsearch/data/es02/data/*
-docker/elasticsearch/data/es03/data/*
+fscrawler/config/_default
+fscrawler/logs
+elasticsearch/data/certs/*
+elasticsearch/data/es01/data/*
+elasticsearch/data/es02/data/*
+elasticsearch/data/es03/data/*
+
+frontend/node_modules
+frontend/build
+frontend/.svelte-kit
 

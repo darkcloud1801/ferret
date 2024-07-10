@@ -4,8 +4,8 @@ services:
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
-      - ./docker/setup/scripts/:/usr/share/elasticsearch/scripts
+      - ./elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
+      - ./setup/scripts/:/usr/share/elasticsearch/scripts
     user: "0"
     env_file:
       - .env
@@ -26,8 +26,8 @@ services:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
-      - ./docker/elasticsearch/data/es01/data:/usr/share/elasticsearch/data
+      - ./elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
+      - ./elasticsearch/data/es01/data:/usr/share/elasticsearch/data
     env_file:
       - .env
     ports:
@@ -76,8 +76,8 @@ services:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
-      - ./docker/elasticsearch/data/es02/data:/usr/share/elasticsearch/data
+      - ./elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
+      - ./elasticsearch/data/es02/data:/usr/share/elasticsearch/data
     env_file:
       - .env
     environment:
@@ -123,8 +123,8 @@ services:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
-      - ./docker/elasticsearch/data/es03/data:/usr/share/elasticsearch/data
+      - ./elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
+      - ./elasticsearch/data/es03/data:/usr/share/elasticsearch/data
     env_file:
       - .env
     environment:
@@ -169,8 +169,8 @@ services:
         condition: service_healthy
     image: alpine
     volumes:
-      - ./docker/elasticsearch/cohen:/usr/local/bin/config/elasticsearch
-      - ./docker/fscrawler/config:/usr/local/bin/config/fscrawler
+      - ./elasticsearch/settings:/usr/local/bin/config/elasticsearch
+      - ./fscrawler/config:/usr/local/bin/config/fscrawler
     entrypoint: ["/bin/sh", "/usr/local/bin/config/elasticsearch/initialize_index.sh"]
     env_file:
       - .env
@@ -192,7 +192,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     volumes:
-      - ./docker/elasticsearch/data/certs:/usr/share/kibana/config/certs
+      - ./elasticsearch/data/certs:/usr/share/kibana/config/certs
       - kibanadata:/usr/share/kibana/data
     ports:
       - ${KIBANA_PORT}:5601
@@ -222,26 +222,19 @@ services:
         condition: service_healthy
     build:
       context: .
-      dockerfile: docker/fscrawler/Dockerfile
+      dockerfile: fscrawler/Dockerfile
     container_name: fscrawler
     restart: always
     volumes:
-      - ../expert_data_test:/usr/share/fscrawler/files
-      - ./docker/elasticsearch/data/certs:/usr/share/fscrawler/certs
-      - ./docker/fscrawler/config:/root/.fscrawler
-      - ./docker/fscrawler/logs:/usr/share/fscrawler/logs
-      - ./docker/fscrawler/external:/usr/share/fscrawler/external
-      - ./docker/fscrawler/log4j2.properties:/usr/share/fscrawler/log4j2.properties:ro
+      - ../../../mnt/expert_share/clients:/usr/share/fscrawler/files
+      - ./elasticsearch/data/certs:/usr/share/fscrawler/certs
+      - ./fscrawler/config:/root/.fscrawler
+      - ./fscrawler/logs:/usr/share/fscrawler/logs
+      - ./fscrawler/external:/usr/share/fscrawler/external
+      - ./fscrawler/log4j2.properties:/usr/share/fscrawler/log4j2.properties:ro
     environment:
       - FSCRAWLER_DEBUG=true
       - FSCLOG=debug
-
-#      - FRAMES_RELOAD=5
-##      - FRAMES_INDEX=fscrawler
-#      - FRAMES_INDEX_SETTINGS={\"number_of_shards\":1,\"number_of_replicas\":0}
-#      - FRAMES_ELASTICSEARCH_NODES=es01:9200,es02:9200,es03:9200
-#      - FRAMES_ELASTICSEARCH_USERNAME=kibana_system
-#      - FRAMES_ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
 
     entrypoint: ["/bin/sh", "/root/.fscrawler/run_fscrawler.sh"]
     ports:
@@ -249,15 +242,31 @@ services:
     networks:
       - es-net
 
+  frontend:
+    depends_on:
+      pipeline-loader:
+        condition: service_healthy
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./elasticsearch/data/certs:/app/data/elasticsearch/certs
+    environment:
+      - ORIGIN=http://localhost:3000
+      - NODE_ENV=production
+      - ELASTICSEARCH_URL=https://es01:9200
+    ports:
+      - "3000:3000"
+    networks:
+      - es-net
+
 volumes:
-#  certs:
-#    driver: local
-#  esdata01:
-#    driver: local
-#  esdata02:
-#    driver: local
-#  esdata03:
-#    driver: local
   kibanadata:
     driver: local
 

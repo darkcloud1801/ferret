@@ -1,7 +1,7 @@
-name: "cohen_natives"
+name: "cohen"
 
 fs:
-  url: "/usr/share/fscrawler/files/cohen/Natives"
+  url: "/usr/share/fscrawler/files/Cohen v Cohen"
   follow_symlink: false
   remove_deleted: true
   continue_on_error: false
@@ -79,7 +79,7 @@ fs:
     rotate_pages_threshold: 10
 
 elasticsearch:
-  index: "cohen_natives"
+  index: "cohen"
   type: "_doc"
   nodes:
     - url: "https://es01:9200"
@@ -91,7 +91,7 @@ elasticsearch:
   ssl_verification: false
   analysis:
     analyzer:
-      path: "/usr/local/bin/config/cohen/mappings/mapping.json"
+      path: "/usr/local/bin/config/settings/mappings/mapping.json"
 
 rest :
   url: "http://fscrawler:8080"
