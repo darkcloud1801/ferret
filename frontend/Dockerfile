@@ -19,8 +19,8 @@ RUN npm run build
 RUN rm -rf src/ static/ docker-compose.yml
 RUN ls -al
 
-# The USER instruction sets the user name to use as the default user for the remainder of the current stage
-USER node:node
+## The USER instruction sets the user name to use as the default user for the remainder of the current stage
+#USER node:node
 
 # This is the command that will be run inside the image when you tell Docker to start the container
 CMD ["node","build/index.js"]

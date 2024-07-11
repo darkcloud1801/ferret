@@ -232,11 +232,9 @@ services:
       - ./fscrawler/logs:/usr/share/fscrawler/logs
       - ./fscrawler/external:/usr/share/fscrawler/external
       - ./fscrawler/log4j2.properties:/usr/share/fscrawler/log4j2.properties:ro
-    environment:
-      - FSCRAWLER_DEBUG=true
-      - FSCLOG=debug
-
     entrypoint: ["/bin/sh", "/root/.fscrawler/run_fscrawler.sh"]
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     networks:
@@ -257,10 +255,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./elasticsearch/data/certs:/app/data/elasticsearch/certs
+    env_file:
+      - .env
     environment:
-      - ORIGIN=http://localhost:3000
-      - NODE_ENV=production
-      - ELASTICSEARCH_URL=https://es01:9200
     ports:
       - "3000:3000"
     networks:
