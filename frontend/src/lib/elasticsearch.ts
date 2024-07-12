@@ -72,8 +72,9 @@ export async function searchElastic(query: string, index: string): Promise<Searc
       post_tags: ["</span>"],
       fields : {
         content : {
-          fragment_size: 300,
-          number_of_fragments : 3
+          type: "plain",
+          fragment_size: 100,
+          number_of_fragments : 1
         }
       }
     }
