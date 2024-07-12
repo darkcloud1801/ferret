@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
   setup:
-    container_name: setup-elastic
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
       - ./elasticsearch/data/certs:/usr/share/elasticsearch/config/certs
@@ -41,7 +40,7 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=certs/es01/es01.key
@@ -88,7 +87,7 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=certs/es02/es02.key
@@ -135,7 +134,7 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=certs/es03/es03.key
@@ -165,7 +164,6 @@ services:
       - es-net
 
   pipeline-loader:
-    container_name: pipeline-loader
     depends_on:
       es03:
         condition: service_healthy
@@ -185,7 +183,6 @@ services:
       - es-net
 
   kibana:
-    container_name: kibana
     depends_on:
       es01:
         condition: service_healthy
@@ -244,7 +241,6 @@ services:
       - es-net
 
   frontend:
-    container_name: frontend
     depends_on:
       pipeline-loader:
         condition: service_healthy
