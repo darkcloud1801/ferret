@@ -1,7 +1,7 @@
-name: "cohen"
+name: "cohen_emails"
 
 fs:
-  url: "/usr/share/fscrawler/files/Cohen v Cohen"
+  url: "/usr/share/fscrawler/files/Cohen v Cohen/05-14-2024 - email production/Searchable PDF's (Combined)"
   follow_symlink: false
   remove_deleted: true
   continue_on_error: false
@@ -80,7 +80,7 @@ fs:
     rotate_pages_threshold: 10
 
 elasticsearch:
-  index: "cohen"
+  index: "cohen_emails"
   type: "_doc"
   nodes:
     - url: "https://es01:9200"
