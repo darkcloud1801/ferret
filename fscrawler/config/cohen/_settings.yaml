@@ -24,7 +24,7 @@ fs:
   - "*.P7S"
 
   # optional: do not send big files to TIKA
-#  ignore_above: "512mb"
+  ignore_above: "512mb"
 
   # special handling of JSON files, should only be used if ALL files are JSON
   json_support: false

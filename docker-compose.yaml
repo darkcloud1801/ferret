@@ -226,7 +226,7 @@ services:
     container_name: fscrawler
     restart: always
     volumes:
-      - ../../../mnt/expert_share/clients:/usr/share/fscrawler/files
+      - ../../../mnt/expert_share/clients:/usr/share/fscrawler/files # ../../../ for shared volume
       - ./elasticsearch/data/certs:/usr/share/fscrawler/certs
       - ./fscrawler/config:/root/.fscrawler
       - ./fscrawler/logs:/usr/share/fscrawler/logs
